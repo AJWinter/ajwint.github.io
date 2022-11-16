@@ -7,13 +7,48 @@
     <title>Document</title>
 </head>
 <body>
-    <p>test pie</p>
+
+    <!-- Default page, unchanged if ajax response fails -->
+    <h1></h1>
+    <p></p>
+    <input type="button" id="btn" value="Retrieve Scores">
+
+    <!-- Area designated for displaying retrieved data -->
+    <div id="result"> </div>
 
     <script>
+
+        // Script functionality added after content loads
+        document.addEventListener(`DOMContentLoaded`, () => {
+
+            // Add event listener to the selected button that makes an AJAX call when clicked
+            document.querySelector(`#btn`).onclick  = async  () => {
+
+                //backend call for the data on the sites domain, stored as JSON
+                var response = await fetch(`exam_scores.json`);
+
+                //for terminal/debugging
+                console.log(`Data as a [JSON] object:`,``, respone);
+
+                //check status attribute of the response object
+                if (response.ok) {
+
+                    //if status is good: convert the json data of the response object into a JS object called data
+                    var data = await response.json();
+
+                    console.log(`Data as a [JavaScript] object:`, ``, data);
+
+                    //We can now build a DOM table element from the [data obj]
+                    var scoresTable = document.createElement(`table`);
+                    scoresTable.style = `border-spacing: 5px`;
+                }
+
+            }
+
+        })
         
         
-        document.getElementsByTagName("p").innerHTML= "pi r square";
-        console.log('test');
+        
 
     </script>
 </body>
