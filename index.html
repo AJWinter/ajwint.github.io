@@ -4,53 +4,151 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    
+    <!-- includes handlebars library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.min.js"></script>
+    
+    <!-- Handlebars.js template -->
+    <script id="table-template" type="text/x-handlebars-template">
+        <br>
+        <h3>Results for filtered dataset:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <td>Name</td>
+                    <td>Major</td>
+                    <td>Midterm</td>
+                    <td>Final</td>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each students}}
+                    <tr>
+                        <td>{{name}}</td>
+                        <td>{{major}}</td>
+                        <td>{{midterm}}</td>
+                        <td>{{final}}</td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        
+    </script>
+
+
+
+    <style>
+
+        span {
+            display: flex;
+            justify-content: center;
+        }
+
+        span input{
+            min-width: 100px;
+            margin: 1em;
+        }
+
+        table {
+            border-spacing: 20px;
+            border-style: double;
+            text-align: center;
+        }
+
+        /* tr {
+            margin: 5px;
+            text-align: center;
+        } */
+
+        table thead {
+            background-color: burlywood;
+            font-weight: bold;
+            border-style: solid;
+        }
+
+    </style>
+
+
+
+    <title>Program 5: Ajax with Handlebars.js</title>
+
 </head>
 <body>
 
-    <!-- Default page, unchanged if ajax response fails -->
-    <h1></h1>
-    <p></p>
-    <input type="button" id="btn" value="Retrieve Scores">
+    <main>
+        <!-- Default page, unchanged if ajax response fails -->
+        <span>
+            <h1>Select a Major:</h1>
+            <input type="button" id="btnCIT" value="CIT">
+            <input type="button" id="btnBUS" value="Business">
+        </span>
+        <hr>
 
-    <!-- Area designated for displaying retrieved data -->
-    <div id="result"> </div>
+        <!-- Area designated for displaying retrieved data -->
+         <div id="result"> </div>
+        
+    </main>
+
+    
 
     <script>
 
         // Script functionality added after content loads
         document.addEventListener(`DOMContentLoaded`, () => {
 
-            // Add event listener to the selected button that makes an AJAX call when clicked
-            document.querySelector(`#btn`).onclick  = async  () => {
+            //use onlick event to pass desired filter to the function that will build the table from the data
+            document.querySelector(`#btnCIT`).onclick  = () => buildTable(`CIT`);
 
-                //backend call for the data on the sites domain, stored as JSON
-                var response = await fetch(`exam_scores.json`);
+            document.querySelector(`#btnBUS`).onclick  = () => buildTable(`BUS`);
+                    
+        });
 
-                //for terminal/debugging
-                console.log(`Data as a [JSON] object:`,``, response);
 
-                //check status attribute of the response object
-                if (response.ok) {
+        // table building function using a passed filter argument and a handlebars.js template
+        async function buildTable (filter) {
 
-                    //if status is good: convert the json data of the response object into a JS object called data
-                    var data = await response.json();
+            var response = await fetch(`cit5students.json`); //request main dataset
 
-                    console.log(`Data as a [JavaScript] object:`, ``, data);
+            //Check status attribute of the response object
+            if (response.ok) {
 
-                    //We can now build a DOM table element from the [data obj]
-                    var scoresTable = document.createElement(`table`);
-                    scoresTable.style = `border-spacing: 5px`;
+                //if status is good (ok == true): convert the json data of the response object into a JS object called data
+                 var data = await response.json();
+ 
+                //parse data using filter
+                var tableData = [];  //variable to hold our parse data set
+                
+                //loop to search cit5students.json
+                for (student in data){
+                    if (data[student].major == filter){ //checks entry against filter
+                        tableData.push(data[student]);  //appends filtered data array                    
+                    }
                 }
 
+                //code required to use Handlebars.js templating
+                var context ={students:tableData};  //creata data package for handlebar template
+                var tableTemplateScript = document.getElementById(`table-template`).innerHTML; //moves template script into variable
+                var tableTemplateCompiled = Handlebars.compile(tableTemplateScript);  //run template through the templating library
+                var tableHTML = tableTemplateCompiled(context); //save template with passed data as html
+
+                //adds the finished table to the DOM           
+                document.getElementById(`result`).innerHTML = tableHTML;           
+            
+                console.log(tableHTML);
             }
-
-        })
+            //message in the event that dataset can not be retrieved
+            else {
+                document.querySelector(`#result`).innerHTML = `DATA NOT FOUND!`;
+            }
+        }
         
-        
-        
-
     </script>
+
 </body>
 
 </html>
+
+
+
+
+
